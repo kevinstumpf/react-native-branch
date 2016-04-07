@@ -52,7 +52,7 @@ RCT_EXPORT_MODULE();
 }
 
 - (void) onInitSessionFinished:(NSNotification*) notification {
-  [self.bridge.eventDispatcher sendAppEventWithName:@"RNBranch.initSessionFinished" body:[notification object]];
+  [self.bridge.eventDispatcher sendDeviceEventWithName:@"RNBranch.initSessionFinished" body:[notification object]];
 }
 
 
@@ -129,6 +129,28 @@ RCT_EXPORT_METHOD(showShareSheet:(NSDictionary *)shareOptionsMap withBranchUnive
       callback(@[result]);
     }];
   });
+}
+
+
+RCT_EXPORT_METHOD(getShortUrl:(NSDictionary *)linkPropertiesMap resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    NSString *feature = [linkPropertiesMap objectForKey:@"feature"];
+    NSString *channel = [linkPropertiesMap objectForKey:@"channel"];
+    NSString *stage = [linkPropertiesMap objectForKey:@"stage"];
+    NSArray *tags = [linkPropertiesMap objectForKey:@"tags"];
+
+    [[Branch getInstance] getShortURLWithParams:linkPropertiesMap
+                                        andTags:tags
+                                     andChannel:channel
+                                     andFeature:feature
+                                       andStage:stage
+                                    andCallback:^(NSString *url, NSError *error) {
+                                        if (error) {
+                                            NSLog(@"RNBranch::Error: %@", error.localizedDescription);
+                                            reject(@"RNBranch::Error", @"getShortURLWithParams", error);
+                                        }
+                                        resolve(url);
+                                    }];
 }
 
 @end

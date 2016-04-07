@@ -9,6 +9,9 @@ var _ = require('lodash');
 const nativeEventEmitter = Platform.OS === 'ios' ? NativeAppEventEmitter : DeviceEventEmitter;
 
 class Branch {
+  _lastParams = {};
+  _sessionListeners = [];
+
   constructor() {
     //We listen to the initialization event AND retrieve the result to account for both scenarios in which the results may already be available or be posted at a later point in time
     nativeEventEmitter.addListener('RNBranch.initSessionFinished', this._onReceivedInitSessionResult);
@@ -29,10 +32,20 @@ class Branch {
     this._patientInitSessionObservers.forEach((cb) => {
       cb(result);
     });
+    if (this.isNewResult(result)) this._sessionListeners.forEach(cb => cb(result.params))
     this._patientInitSessionObservers = [];
+    this._lastParams = result.params
   };
 
-  _getInitSessionResult = (callback) => {    
+  isNewResult = ({params}) => {
+    return (this._lastParams['~id'] !== params['~id'] || this._lastParams['+click_timestamp'] !== params['+click_timestamp'])
+  }
+
+  listen = (callback) => {
+    this._sessionListeners.push(callback)
+  };
+
+  _getInitSessionResult = (callback) => {
     rnBranch.getInitSessionResult(callback);
   };
 
@@ -44,7 +57,7 @@ class Branch {
     this._patientInitSessionObservers.push(callback);
   };
 
-  setDebug = () => {   
+  setDebug = () => {
     rnBranch.setDebug();
   };
 
@@ -75,6 +88,10 @@ class Branch {
     _.defaults(linkProperties, {feature: 'share', channel: 'RNApp'});
 
     rnBranch.showShareSheet(shareOptions, branchUniversalObject, linkProperties, ({channel, completed, error}) => callback({channel, completed, error}));
+  };
+
+  getShortUrl = () => {
+    return rnBranch.getShortUrl();
   };
 }
 
