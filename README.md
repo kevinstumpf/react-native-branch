@@ -1,4 +1,4 @@
-** Update: This library is now maintained by the Branch Metrics Team: https://github.com/BranchMetrics/React-Native-Deep-Linking-SDK **
+Update: This library is now maintained by the Branch Metrics Team: https://github.com/BranchMetrics/React-Native-Deep-Linking-SDK
 
 # react-native-branch
 Native Wrapper around Branch Metrics native SDKs. Tested with React Native 0.21.0. 
